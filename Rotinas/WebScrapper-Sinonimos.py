@@ -23,9 +23,9 @@ def encontrar_sinonimos(palavra):
     soup = BeautifulSoup(r.content, 'html.parser')
 
     conteudo = soup.find('div', id='content')
-    titulo = conteudo.find('h1', class_='h-palavra')
-    sentidos = conteudo.find_all('div', class_='sentido')
-    sinonimos = conteudo.find_all('p', class_='sinonimos')
+    titulo = conteudo.find('h1')
+    sentidos = conteudo.find_all('div', class_='content-detail--subtitle')
+    sinonimos = conteudo.find_all('p', class_='syn-list')
 
     return {'palavra': palavra, 'resultado': zip(sentidos, sinonimos)}
         

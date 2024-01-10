@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visulizador de CSV</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        padding: 1rem;
+        font-size: 1.2rem;
+        line-height: 1.3em;
+      }
+
+      .container {
+        margin: auto;
+        max-width: 60ch;
+      }
+
+      #interface {
+        margin-bottom: 6rem;
+      }
+
+      .card {
+        margin-bottom: 4rem;
+        border-bottom: 1px solid;
+      }
+
+      .label {
+        /* text-transform: uppercase; */
+    
+        font-size: 0.8rem;
+        font-family: 'Mori Gothic', sans-serif;
+        /* letter-spacing: 0.1em; */
+        line-height: 1.2em;
+        padding-top: 0.4em;
+      }
+
+      .field {
+        padding: 0.5rem 0;
+        /* display: grid; */
+        grid-template-columns: 1fr 5fr;
+        border-top: 1px solid;
+        page-break-inside: avoid;
+      }
+
+      @media print {
+
+        #interface {
+          display: none;
+        }
+
+        body {
+          font-size: 1rem
+        }
+        
+      }
+      
+    </style>
+  </head>
+  <body>
+    <div class="container">
+    <div id="interface">
+      <input type="file" id="csvFileInput" />
+      <p id="alert">Nenhum arquivo carregado</p>
+    </div>
+
+    <div id="cards"><div class="card"><div class="field"><p class="label">name</p><p class="info">Tyrone Jordan</p></div><div class="field"><p class="label">country</p><p class="info">Italy</p></div><div class="field"><p class="label">date</p><p class="info">Feb 25, 2024</p></div><div class="field"><p class="label">decripition text</p><p class="info">Morbi quis urna. Nunc quis arcu vel quam dignissim pharetra. Nam ac nulla. In tincidunt congue turpis. In condimentum. Donec at arcu. Vestibulum ante ipsum primis in</p></div></div><div class="card"><div class="field"><p class="label">name</p><p class="info">Abdul Davidson</p></div><div class="field"><p class="label">country</p><p class="info">Brazil</p></div><div class="field"><p class="label">date</p><p class="info">Jan 29, 2024</p></div><div class="field"><p class="label">decripition text</p><p class="info">magna, malesuada vel, convallis in, cursus et, eros. Proin ultrices. Duis volutpat nunc</p></div></div><div class="card"><div class="field"><p class="label">name</p><p class="info">Wade Cash</p></div><div class="field"><p class="label">country</p><p class="info">Ukraine</p></div><div class="field"><p class="label">date</p><p class="info">Mar 2, 2023</p></div><div class="field"><p class="label">decripition text</p><p class="info">Cras pellentesque. Sed dictum. Proin eget odio. Aliquam vulputate ullamcorper magna. Sed eu eros. Nam consequat dolor vitae dolor. Donec fringilla. Donec feugiat metus sit amet ante. Vivamus</p></div></div><div class="card"><div class="field"><p class="label">name</p><p class="info">Cole Hayes</p></div><div class="field"><p class="label">country</p><p class="info">Vietnam</p></div><div class="field"><p class="label">date</p><p class="info">Jan 19, 2023</p></div><div class="field"><p class="label">decripition text</p><p class="info">felis, adipiscing fringilla, porttitor vulputate, posuere vulputate, lacus. Cras interdum. Nunc sollicitudin commodo ipsum. Suspendisse non leo. Vivamus nibh dolor, nonummy ac, feugiat</p></div></div><div class="card"><div class="field"><p class="label">name</p><p class="info">Reuben Aguirre</p></div><div class="field"><p class="label">country</p><p class="info">Netherlands</p></div><div class="field"><p class="label">date</p><p class="info">May 25, 2024</p></div><div class="field"><p class="label">decripition text</p><p class="info">nec metus facilisis lorem tristique aliquet. Phasellus fermentum convallis ligula. Donec luctus aliquet odio.</p></div></div></div>
+  </div>
+    <script>
+      let alert = document.getElementById("alert");
+      let cards = document.getElementById("cards");
+
+      document.getElementById("csvFileInput").addEventListener("change", function (event) {
+        const file = event.target.files[0];
+
+        Papa.parse(file, {
+          header: true,
+          dynamicTyping: true,
+          complete: function (results) {
+            alert.innerText = "Dados carregados com sucesso.";
+            console.log("Dados CSV analisados:", results.data);
+            cards_generator(results.data);
+          },
+          error: function (error) {
+            alert.innerText = `"Erro ao analisar o CSV: ${error.message}`;
+            console.error("Erro ao analisar o CSV:", error.message);
+          },
+        });
+      });
+
+      function cards_generator(data) {
+        cards.textContent = '';
+        data.forEach((d) => {
+          let card = document.createElement("div");
+          card.classList.add("card");
+
+          let question_type = 'textual';
+          for (let [key, value] of Object.entries(d)) {
+
+            // Checa se uma questão de opção
+            let question = key.split(',');
+            question_type = question[0] === 'With the business in mind' ? 'options' : 'textual';
+            
+            if( question_type === 'textual') {
+
+              let field = document.createElement('div')
+              field.classList.add("field");
+
+              let label = document.createElement("p");
+              label.classList.add("label");
+              label.innerText = key;
+
+              let info = document.createElement("p");
+              info.classList.add("info");
+              info.innerText = value;
+              
+              field.appendChild(label);
+              field.appendChild(info);
+              card.appendChild(field);
+
+            }
+
+            if( question_type === 'options') {
+              // With the business in mind, choose just one word from each pair below 
+              // (don't worry, there is no "right or wrong", we will detail this answer in our next meeting): 
+              // [fun (1) or serious (2)]
+              // 1
+
+              question = key.split(': ');
+              question_options = question[1].replace('[','');
+              question_options = question_options.replace(']','');
+              question_options = question_options.split(' or ');
+        
+              let field = document.createElement('div')
+              field.classList.add("field");
+
+              let label = document.createElement("p");
+              label.classList.add("label");
+              label.innerText = `${question_options[0]} or ${question_options[1]}`;
+
+              let info = document.createElement("p");
+              info.classList.add("info");
+              info.innerText = value == 1 ? question_options[0] : question_options[1];
+
+              field.appendChild(label);
+              field.appendChild(info);
+              card.appendChild(field);
+
+            }
+
+            
+
+          }
+
+          
+
+          cards.appendChild(card);
+        });
+      }
+    </script>
+  </body>
+</html>
